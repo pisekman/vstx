@@ -418,6 +418,15 @@ class Grid {
 
     onCountEmptyClick(event) {
         console.error(`Counting amount of empty cells...`);
+        let emptyFields = 0;
+        for (const row of this.table.rows) {
+            for (const cell of row.cells) {
+                if (cell.innerText === '') {
+                    emptyFields++;
+                }
+            }
+        }
+        return alert('The number of empty fields is ' +emptyFields);
     }
 
     onComputeTotalsClick(event) {
