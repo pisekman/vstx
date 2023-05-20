@@ -332,7 +332,7 @@ class Grid {
 
         for (const row of this.body.rows) {
             const firstCell = row.cells[0];
-            firstCell.classList.add('hidden');
+            firstCell.classList.toggle('hidden');
         }
 
         // for (const column of this.head.rows) {
@@ -391,15 +391,84 @@ class Grid {
 
             }
         }
+    /*TODO ADD HIDE TOGGLE*/
 
     }
 
     onMarkEmptyClick(event) {
         console.error(`Marking empty cells...`);
+
+        for (const row of this.body.rows) {
+            for (const cell of row.cells) {
+                if (cell.classList.contains('number') && cell.innerText === '') {
+                    cell.style.backgroundColor = 'yellow';
+                }
+            }
+        }
     }
 
     onFillTableClick(event) {
         console.error(`Filling empty cells with data...`);
+        // for (const row of this.body.rows) {
+        //     let quantity = 0;
+        //     let unitPrice = 0;
+        //     let totalCell = null;
+        //     let totalValue = 0;
+        //     for (const cell of row.cells) {
+        //         const headerCell = this.head.rows[0].cells[cell.cellIndex];
+        //         if (cell.classList.contains('number') && headerCell.innerText == 'Total (Quantity * Unit price)') {
+        //             totalCell = cell;
+        //             console.log(cell,'cell')
+        //             totalValue = Number(cell.innerText);
+        //         } else if (cell.classList.contains('number') && headerCell.innerText == 'Quantity') {
+        //             quantity = Number(cell.innerText);
+        //             // if (cell.innerText == '') {
+        //             //     cell.innerText = (totalValue / unitPrice)
+        //             // }
+        //             console.log(totalValue, 'total value')
+        //
+        //         } else if (cell.classList.contains('number') && headerCell.innerText == 'Unit price') {
+        //             unitPrice = Number(cell.innerText);
+        //         }
+        //     }
+        //     if (totalCell && totalValue === 0) {
+        //         totalCell.innerText = quantity * unitPrice;
+        //     }
+        //
+        for (const row of this.body.rows) {
+            let quantityCell = null;
+            let quantityValue = 0;
+            let unitPrice = 0;
+            let unitCell = null;
+            let totalValue = 0;
+            let totalCell = null;
+            for (const cell of row.cells) {
+                const headerCell = this.head.rows[0].cells[cell.cellIndex]
+                if (cell.classList.contains('number') && headerCell.innerText == 'Total (Quantity * Unit price)') {
+                    totalCell = cell;
+                    totalValue = Number(cell.innerText);
+                } else if (cell.classList.contains('number') && headerCell.innerText == 'Quantity') {
+                    quantityCell = cell;
+                    quantityValue = Number(cell.innerText);
+                } else if (cell.classList.contains('number') && headerCell.innerText == 'Unit price') {
+                    unitCell = cell;
+                    unitPrice = Number(cell.innerText);
+                }
+            }
+            if (quantityCell && quantityValue === 0 && !isNaN(totalValue) && !isNaN(unitPrice) && unitPrice !== 0) {
+                quantityCell.innerText = totalValue / unitPrice;
+            }
+            if (totalCell && totalValue === 0  && !isNaN(quantityValue) && !isNaN(unitPrice) && unitPrice !== 0) {
+                    // totalCell.innerText = quantityCell * unitPrice;
+                console.log(quantityValue, 'quantityCell')
+                    totalCell.innerText = unitPrice * quantityValue
+            }
+            if (unitCell && unitPrice === 0) {
+                // unitCell.innerText = totalValue / quantityValue;
+                console.log(1)
+                unitCell.innerText = 1;
+            }
+        }
     }
 
     onCountEmptyClick(event) {
@@ -412,6 +481,13 @@ class Grid {
 
     onFunctionsResetClick(event) {
         console.error(`Resetting all function...`);
+        for (const row of this.body.rows) {
+            for (const cell of row.cells) {
+                if (cell.classList.contains('number') && cell.innerText === '') {
+                    cell.style.backgroundColor = '';
+                }
+            }
+        }
     }
 }
 
