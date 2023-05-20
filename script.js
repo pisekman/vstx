@@ -204,6 +204,8 @@ class Grid {
     constructor() {
         this.data = data;
         this.metadata = metadata;
+        this.additionalDataFromBooksDB = additionalDataFromBooksDB;
+        this.additionalMetadataFromBooksDB = additionalMetadataFromBooksDB;
 
         // HINT: below map can be useful for view operations ;))
         this.dataViewRef = new Map();
@@ -231,9 +233,12 @@ class Grid {
     renderHead() {
         const row = this.head.insertRow();
 
-        for (const column of this.metadata) {
-            const cell = row.insertCell();
+        const metadataIds = this.metadata.map(column => column.id);
+        const filteredAdditionalMetadata = this.additionalMetadataFromBooksDB.filter(column => !metadataIds.includes(column.id));
+        const mergedMetadata = [...this.metadata, ...filteredAdditionalMetadata];
 
+        for (const column of mergedMetadata) {
+            const cell = row.insertCell();
             cell.innerText = column.label;
         }
     }
@@ -271,33 +276,18 @@ class Grid {
     onSearchGo(event) {
         console.error(`Searching...`);
 
-        // const searchQuery = searchInputElement.value
-
-        // hide rows that do not match the search query
-        // for (let dataRow of this.data) {
-        //     const viewRow = this.dataViewRef.get(dataRow);
-        //     console.log(viewRow, 'vw')
-        //     let match = false;
-
-        //     for (let column of this.metadata) {
-        //         if (dataRow[column.id] && dataRow[column.id].toString().includes(searchQuery)) {
-        //             match = true;
-        //             break;
-        //         }
-        //     }
-        //     if (!match) {
-        //         viewRow.classList.add('hidden');
-        //     }
-        // }
-
         const searchQuery = searchInputElement.value;
 
         for (const dataRow of this.data) {
             const viewRow = this.dataViewRef.get(dataRow);
+            // console.log(viewRow,'viewrow')
+            console.log(typeof viewRow)
+            // console.table(viewRow)
             let match = false;
 
             for (const column of this.metadata) {
                 if (dataRow[column.id] && dataRow[column.id].toString().includes(searchQuery)) {
+                    console.log(dataRow[column.id], 'column id');
                     match = true;
                     break;
                 }
