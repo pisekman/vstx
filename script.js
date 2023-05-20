@@ -334,35 +334,11 @@ class Grid {
             const firstCell = row.cells[0];
             firstCell.classList.toggle('hidden');
         }
-
-        // for (const column of this.head.rows) {
-        //     console.log(column, 'column')
-        //     const firstHeadCell = column.cells[0]
-        //     // console.log(firstHeadCell)
-        //     firstHeadCell.classList.add('hidden');
-        //     for (const row of this.body.rows) {
-        //         const firstCell = row.cells[0];
-        //         // console.log(row)
-        //         firstCell.classList.add('hidden');
-
-        //     }
-        // }
-
-
     }
 
     onColumnShowClick(event) {
         console.error(`Showing first hidden column from the left...`);
-        // for (const row of this.table.rows) {
-        //     for (let i = 0; i < row.cells.length; i++) {
-        //         const cell = row.cells[i];
-        //         if (i === 0) {
-        //             cell.classList.remove('hidden')
-        //         } else {
-        //             cell.classList.add('hidden')
-        //         }
-        //     }
-        // }
+
         for (const row of this.table.rows) {
             for (const cell of row.cells) {
                 cell.classList.add('hidden');
@@ -375,20 +351,10 @@ class Grid {
 
     onColumnReset(event) {
         console.error(`Resetting column visibility...`);
-        // for (const column of this.head.rows) {
-        //     const firstHeadCell = column.cells[0]
-        //     firstHeadCell.classList.remove('hidden');
-        //     console.log(column)
-        //     for (const row of this.body.rows) {
-        //         const firstCell = row.cells[0];
-        //         firstCell.classList.remove('hidden');
-        //     }
-        // }
-        for (const row of this.table.rows) {
-            for (let i = 0; i < row.cells.length; i++) {
-                const cell = row.cells[i];
-                cell.classList.remove('hidden')
 
+        for (const row of this.table.rows) {
+            for (const cell of row.cells) {
+                cell.classList.remove('hidden');
             }
         }
     /*TODO ADD HIDE TOGGLE*/
@@ -409,32 +375,7 @@ class Grid {
 
     onFillTableClick(event) {
         console.error(`Filling empty cells with data...`);
-        // for (const row of this.body.rows) {
-        //     let quantity = 0;
-        //     let unitPrice = 0;
-        //     let totalCell = null;
-        //     let totalValue = 0;
-        //     for (const cell of row.cells) {
-        //         const headerCell = this.head.rows[0].cells[cell.cellIndex];
-        //         if (cell.classList.contains('number') && headerCell.innerText == 'Total (Quantity * Unit price)') {
-        //             totalCell = cell;
-        //             console.log(cell,'cell')
-        //             totalValue = Number(cell.innerText);
-        //         } else if (cell.classList.contains('number') && headerCell.innerText == 'Quantity') {
-        //             quantity = Number(cell.innerText);
-        //             // if (cell.innerText == '') {
-        //             //     cell.innerText = (totalValue / unitPrice)
-        //             // }
-        //             console.log(totalValue, 'total value')
-        //
-        //         } else if (cell.classList.contains('number') && headerCell.innerText == 'Unit price') {
-        //             unitPrice = Number(cell.innerText);
-        //         }
-        //     }
-        //     if (totalCell && totalValue === 0) {
-        //         totalCell.innerText = quantity * unitPrice;
-        //     }
-        //
+
         for (const row of this.body.rows) {
             let quantityCell = null;
             let quantityValue = 0;
