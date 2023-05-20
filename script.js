@@ -426,7 +426,7 @@ class Grid {
                 }
             }
         }
-        return alert('The number of empty fields is ' +emptyFields);
+        return alert(`Found ${emptyFields} empty cells.`);
     }
 
     onComputeTotalsClick(event) {
