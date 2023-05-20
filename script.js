@@ -444,29 +444,33 @@ class Grid {
             let totalCell = null;
             for (const cell of row.cells) {
                 const headerCell = this.head.rows[0].cells[cell.cellIndex]
-                if (cell.classList.contains('number') && headerCell.innerText == 'Total (Quantity * Unit price)') {
-                    totalCell = cell;
-                    totalValue = Number(cell.innerText);
-                } else if (cell.classList.contains('number') && headerCell.innerText == 'Quantity') {
-                    quantityCell = cell;
-                    quantityValue = Number(cell.innerText);
-                } else if (cell.classList.contains('number') && headerCell.innerText == 'Unit price') {
-                    unitCell = cell;
-                    unitPrice = Number(cell.innerText);
+                if (cell.classList.contains('number')) {
+                    switch (headerCell.innerText) {
+                        case 'Total (Quantity * Unit price)':
+                            totalCell = cell;
+                            totalValue = Number(cell.innerText);
+                            break;
+                        case 'Quantity':
+                            quantityCell = cell;
+                            quantityValue = Number(cell.innerText);
+                            break;
+                        case 'Unit price':
+                            unitCell = cell;
+                            unitPrice = Number(cell.innerText);
+                            break;
+                    }
                 }
             }
-            if (quantityCell && quantityValue === 0 && !isNaN(totalValue) && !isNaN(unitPrice) && unitPrice !== 0) {
+            const isUnit = !isNaN(unitPrice) && unitPrice !== 0;
+
+            if (quantityCell && quantityValue === 0 && !isNaN(totalValue) && isUnit ){
                 quantityCell.innerText = totalValue / unitPrice;
             }
-            if (totalCell && totalValue === 0  && !isNaN(quantityValue) && !isNaN(unitPrice) && unitPrice !== 0) {
-                    // totalCell.innerText = quantityCell * unitPrice;
-                console.log(quantityValue, 'quantityCell')
-                    totalCell.innerText = unitPrice * quantityValue
+            if (totalCell && totalValue === 0  && !isNaN(quantityValue) && isUnit ){
+                totalCell.innerText = unitPrice * quantityValue
             }
-            if (unitCell && unitPrice === 0) {
-                // unitCell.innerText = totalValue / quantityValue;
-                console.log(1)
-                unitCell.innerText = 1;
+            if (unitCell && unitPrice === 0 ) {
+                unitCell.innerText = totalValue / quantityValue;
             }
         }
     }
@@ -482,9 +486,28 @@ class Grid {
     onFunctionsResetClick(event) {
         console.error(`Resetting all function...`);
         for (const row of this.body.rows) {
+            const rowData = data[row.rowIndex - 1];
             for (const cell of row.cells) {
-                if (cell.classList.contains('number') && cell.innerText === '') {
+                const headerCell = this.head.rows[0].cells[cell.cellIndex];
+                if (cell.classList.contains('number')) {
                     cell.style.backgroundColor = '';
+                    switch (headerCell.innerText) {
+                        case 'Total (Quantity * Unit price)':
+                            if (rowData.total_value === null) {
+                                cell.innerText = "";
+                            }
+                            break;
+                        case 'Quantity':
+                            if (rowData.quantity === null) {
+                                cell.innerText = "";
+                            }
+                            break;
+                        case 'Unit price':
+                            if (rowData.unit_price === null) {
+                                cell.innerText = "";
+                            }
+                            break;
+                    }
                 }
             }
         }
