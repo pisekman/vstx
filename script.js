@@ -209,25 +209,25 @@ const countButtonElement = document.body.querySelector('button.function-count');
 const computeTotalsButtonElement = document.body.querySelector('button.function-totals');
 const resetFunctionButtonElement = document.body.querySelector('button.function-reset');
 
-const summary = data.reduce((acc, item) => {
-    if (!acc[item.author]) {
-        acc[item.author] = {
-            numberOfTitles: 0,
-            totalUnitPrice: 0,
-            totalValue: 0
-        };
-    }
-
-    acc[item.author].numberOfTitles++;
-    acc[item.author].totalUnitPrice += item.unit_price || 0;
-    acc[item.author].totalValue += item.total_value || 0;
-
-    return acc;
-}, {});
-
-for (const author in summary) {
-    summary[author].averageUnitPrice = summary[author].totalUnitPrice / summary[author].numberOfTitles;
-}
+// const summary = data.reduce((acc, item) => {
+//     if (!acc[item.author]) {
+//         acc[item.author] = {
+//             numberOfTitles: 0,
+//             totalUnitPrice: 0,
+//             totalValue: 0
+//         };
+//     }
+//
+//     acc[item.author].numberOfTitles++;
+//     acc[item.author].totalUnitPrice += item.unit_price || 0;
+//     acc[item.author].totalValue += item.total_value || 0;
+//
+//     return acc;
+// }, {});
+//
+// for (const author in summary) {
+//     summary[author].averageUnitPrice = summary[author].totalUnitPrice / summary[author].numberOfTitles;
+// }
 
 
 class Grid {
@@ -284,7 +284,6 @@ class Grid {
     }
 
     renderBody() {
-        // todo - refactor
         const mergedMetadata = this.getMergedMetadata()
         const mergedData = this.getMergedData()
         // console.log(this.data, 'metdada')
@@ -340,7 +339,6 @@ class Grid {
                     break;
                 }
             }
-
             if (!match) {
                 viewRow.classList.add('hidden');
             }
@@ -479,7 +477,7 @@ class Grid {
                 }
             }
         }
-        alert(`Total sum: ${totalSum}`);
+        return alert(`Sum of Total (Quantity * Unit price) equals: ${totalSum}`);
     }
 
     onFunctionsResetClick(event) {
