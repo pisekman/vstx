@@ -236,6 +236,14 @@ class Grid {
         const metadataIds = this.metadata.map(column => column.id);
         const filteredAdditionalMetadata = this.additionalMetadataFromBooksDB.filter(column => !metadataIds.includes(column.id));
         const mergedMetadata = [...this.metadata, ...filteredAdditionalMetadata];
+        // const dataTable = Object.assign({}, this.data, this.additionalDataFromBooksDB)
+        // const dataTable = {...this.data, ...this.additionalDataFromBooksDB}
+        let mergedData = data.map(item => {
+            let additionalData = additionalDataFromBooksDB.find(additionalItem => additionalItem.title === item.title && additionalItem.author === item.author);
+            return {...item, ...additionalData};
+        });
+        console.log(this.data);
+        console.log(mergedData);
 
         for (const column of mergedMetadata) {
             const cell = row.insertCell();
@@ -244,10 +252,17 @@ class Grid {
     }
 
     renderBody() {
-        for (const dataRow of this.data) {
+        const mergedData = data.map(item => {
+            let additionalData = additionalDataFromBooksDB.find(additionalItem => additionalItem.title === item.title && additionalItem.author === item.author);
+            return {...item, ...additionalData};
+        });
+        const metadataIds = this.metadata.map(column => column.id);
+        const filteredAdditionalMetadata = this.additionalMetadataFromBooksDB.filter(column => !metadataIds.includes(column.id));
+        const mergedMetadata = [...this.metadata, ...filteredAdditionalMetadata];
+        for (const dataRow of mergedData) {
             const row = this.body.insertRow();
 
-            for (const column of this.metadata) {
+            for (const column of mergedMetadata) {
                 const cell = row.insertCell();
                 cell.classList.add(column.type);
                 cell.innerText = dataRow[column.id];
@@ -280,9 +295,7 @@ class Grid {
 
         for (const dataRow of this.data) {
             const viewRow = this.dataViewRef.get(dataRow);
-            // console.log(viewRow,'viewrow')
             console.log(typeof viewRow)
-            // console.table(viewRow)
             let match = false;
 
             for (const column of this.metadata) {
