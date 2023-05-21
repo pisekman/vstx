@@ -186,6 +186,15 @@ const additionalMetadataFromBooksDB = [
     }
 ];
 
+const summaryMetaData = [
+    { id: 'author', label: 'Author' },
+    { id: 'titles', label: 'Titles' },
+    { id: 'total_quantity', label: 'Total Quantity' },
+    { id: 'total_revenue', label: 'Total Revenue' },
+    { id: 'avg_quantity', label: 'Average Quantity' },
+    { id: 'unit_price', label: 'Avg Unit Price' }
+];
+
 const searchInputElement = document.body.querySelector('input.search-input');
 const searchButtonElement = document.body.querySelector('button.search-go');
 const searchResetElement = document.body.querySelector('button.search-reset');
@@ -200,8 +209,29 @@ const countButtonElement = document.body.querySelector('button.function-count');
 const computeTotalsButtonElement = document.body.querySelector('button.function-totals');
 const resetFunctionButtonElement = document.body.querySelector('button.function-reset');
 
+const summary = data.reduce((acc, item) => {
+    if (!acc[item.author]) {
+        acc[item.author] = {
+            numberOfTitles: 0,
+            totalUnitPrice: 0,
+            totalValue: 0
+        };
+    }
+
+    acc[item.author].numberOfTitles++;
+    acc[item.author].totalUnitPrice += item.unit_price || 0;
+    acc[item.author].totalValue += item.total_value || 0;
+
+    return acc;
+}, {});
+
+for (const author in summary) {
+    summary[author].averageUnitPrice = summary[author].totalUnitPrice / summary[author].numberOfTitles;
+}
+
+
 class Grid {
-    constructor() {
+    constructor(data, metadata) {
         this.data = data;
         this.metadata = metadata;
         this.additionalDataFromBooksDB = additionalDataFromBooksDB;
@@ -215,7 +245,19 @@ class Grid {
 
         this.render();
         this.live();
-        console.log(this.dataViewRef)
+    }
+
+    getMergedData() {
+        return this.data.map(item => {
+            let additionalData = this.additionalDataFromBooksDB.find(additionalItem => additionalItem.title === item.title && additionalItem.author === item.author);
+            return {...item, ...additionalData};
+        });
+    }
+
+    getMergedMetadata() {
+        const metadataIds = this.metadata.map(column => column.id);
+        const filteredAdditionalMetadata = this.additionalMetadataFromBooksDB.filter(column => !metadataIds.includes(column.id));
+        return [...this.metadata, ...filteredAdditionalMetadata]
     }
 
     render() {
@@ -231,19 +273,9 @@ class Grid {
     }
 
     renderHead() {
-        const row = this.head.insertRow();
+        const mergedMetadata = this.getMergedMetadata()
 
-        const metadataIds = this.metadata.map(column => column.id);
-        const filteredAdditionalMetadata = this.additionalMetadataFromBooksDB.filter(column => !metadataIds.includes(column.id));
-        const mergedMetadata = [...this.metadata, ...filteredAdditionalMetadata];
-        // const dataTable = Object.assign({}, this.data, this.additionalDataFromBooksDB)
-        // const dataTable = {...this.data, ...this.additionalDataFromBooksDB}
-        let mergedData = data.map(item => {
-            let additionalData = additionalDataFromBooksDB.find(additionalItem => additionalItem.title === item.title && additionalItem.author === item.author);
-            return {...item, ...additionalData};
-        });
-        console.log(this.data);
-        console.log(mergedData);
+        const row = this.head.insertRow();
 
         for (const column of mergedMetadata) {
             const cell = row.insertCell();
@@ -252,23 +284,23 @@ class Grid {
     }
 
     renderBody() {
-        const mergedData = data.map(item => {
-            let additionalData = additionalDataFromBooksDB.find(additionalItem => additionalItem.title === item.title && additionalItem.author === item.author);
-            return {...item, ...additionalData};
-        });
-        const metadataIds = this.metadata.map(column => column.id);
-        const filteredAdditionalMetadata = this.additionalMetadataFromBooksDB.filter(column => !metadataIds.includes(column.id));
-        const mergedMetadata = [...this.metadata, ...filteredAdditionalMetadata];
+        // todo - refactor
+        const mergedMetadata = this.getMergedMetadata()
+        const mergedData = this.getMergedData()
+        // console.log(this.data, 'metdada')
+        // console.log(x, 'metdadax')
+
         for (const dataRow of mergedData) {
             const row = this.body.insertRow();
 
-            for (const column of mergedMetadata) {
+            for (const column of mergedMetadata ) {
                 const cell = row.insertCell();
                 cell.classList.add(column.type);
                 cell.innerText = dataRow[column.id];
             }
             // connect data row reference with view row reference
             this.dataViewRef.set(dataRow, row);
+            console.log(this.dataViewRef);
         }
     }
 
@@ -290,18 +322,21 @@ class Grid {
 
     onSearchGo(event) {
         console.error(`Searching...`);
+        const mergedData = this.getMergedData()
+        const mergedMetadata = this.getMergedMetadata()
 
         const searchQuery = searchInputElement.value;
 
-        for (const dataRow of this.data) {
+        for (const dataRow of mergedData) {
+            console.log(dataRow, 'dataRow')
             const viewRow = this.dataViewRef.get(dataRow);
-            console.log(typeof viewRow)
+            console.log(viewRow)
             let match = false;
 
-            for (const column of this.metadata) {
+            for (const column of mergedMetadata) {
                 if (dataRow[column.id] && dataRow[column.id].toString().includes(searchQuery)) {
-                    console.log(dataRow[column.id], 'column id');
                     match = true;
+                    console.log('true')
                     break;
                 }
             }
@@ -319,7 +354,6 @@ class Grid {
 
     onSearchReset(event) {
         console.error(`Resetting search...`);
-        // clear any previous search results
         for (const row of this.body.rows) {
             row.classList.remove('hidden');
         }
@@ -330,7 +364,7 @@ class Grid {
 
         for (const row of this.head.rows) {
             const firstHeadCell = row.cells[0];
-            firstHeadCell.classList.add('hidden');
+            firstHeadCell.classList.toggle('hidden');
         }
 
         for (const row of this.body.rows) {
@@ -360,8 +394,6 @@ class Grid {
                 cell.classList.remove('hidden');
             }
         }
-    /*TODO ADD HIDE TOGGLE*/
-
     }
 
     onMarkEmptyClick(event) {
@@ -434,6 +466,20 @@ class Grid {
 
     onComputeTotalsClick(event) {
         console.error(`Computing summary totals...`);
+        let totalSum = 0;
+
+        for (const row of this.body.rows) {
+            for (const cell of row.cells) {
+                const headerCell = this.head.rows[0].cells[cell.cellIndex];
+                if (cell.classList.contains('number') && headerCell.innerText === 'Total (Quantity * Unit price)') {
+                    const cellValue = parseFloat(cell.innerText);
+                    if (!isNaN(cellValue)) {
+                        totalSum += cellValue;
+                    }
+                }
+            }
+        }
+        alert(`Total sum: ${totalSum}`);
     }
 
     onFunctionsResetClick(event) {
@@ -467,4 +513,5 @@ class Grid {
     }
 }
 
-new Grid();
+new Grid(data, metadata);
+// new Grid(data, summaryMetaData);
