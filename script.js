@@ -186,15 +186,6 @@ const additionalMetadataFromBooksDB = [
     }
 ];
 
-const summaryMetaData = [
-    { id: 'author', label: 'Author' },
-    { id: 'titles', label: 'Titles' },
-    { id: 'total_quantity', label: 'Total Quantity' },
-    { id: 'total_revenue', label: 'Total Revenue' },
-    { id: 'avg_quantity', label: 'Average Quantity' },
-    { id: 'unit_price', label: 'Avg Unit Price' }
-];
-
 const searchInputElement = document.body.querySelector('input.search-input');
 const searchButtonElement = document.body.querySelector('button.search-go');
 const searchResetElement = document.body.querySelector('button.search-reset');
@@ -209,25 +200,7 @@ const countButtonElement = document.body.querySelector('button.function-count');
 const computeTotalsButtonElement = document.body.querySelector('button.function-totals');
 const resetFunctionButtonElement = document.body.querySelector('button.function-reset');
 
-// const summary = data.reduce((acc, item) => {
-//     if (!acc[item.author]) {
-//         acc[item.author] = {
-//             numberOfTitles: 0,
-//             totalUnitPrice: 0,
-//             totalValue: 0
-//         };
-//     }
-//
-//     acc[item.author].numberOfTitles++;
-//     acc[item.author].totalUnitPrice += item.unit_price || 0;
-//     acc[item.author].totalValue += item.total_value || 0;
-//
-//     return acc;
-// }, {});
-//
-// for (const author in summary) {
-//     summary[author].averageUnitPrice = summary[author].totalUnitPrice / summary[author].numberOfTitles;
-// }
+
 
 
 class Grid {
@@ -512,4 +485,76 @@ class Grid {
 }
 
 new Grid(data, metadata);
-// new Grid(data, summaryMetaData);
+
+class TableSummary {
+    constructor(data, metadata) {
+        this.data = data;
+        this.metadata = metadata;
+        this.render();
+    }
+
+    render() {
+        this.table = document.createElement('table');
+
+        this.head = this.table.createTHead();
+        this.body = this.table.createTBody();
+
+        this.renderHead();
+        this.renderBody();
+
+        document.body.append(this.table);
+    }
+
+    renderHead() {
+        const row = this.head.insertRow();
+        const columns = ['Author', 'Titles', 'Total Quantity', 'Total Revenue', 'Average Quantity', 'Average Unit Price'];
+        for (const column of columns) {
+            const cell = row.insertCell();
+            cell.innerText = column;
+        }
+    }
+
+    renderBody() {
+        const groupedData = this.data.reduce((acc, dataRow) => {
+            if (!acc[dataRow.author]) {
+                acc[dataRow.author] = [];
+            }
+            acc[dataRow.author].push(dataRow);
+            return acc;
+        }, {});
+
+        console.log(groupedData)
+        console.log(Object.entries(groupedData))
+
+        for (const [author, dataRows] of Object.entries(groupedData)) {
+            const row = this.body.insertRow();
+
+            // Author
+            let cell = row.insertCell();
+            cell.innerText = author;
+
+            // Titles
+            cell = row.insertCell();
+            cell.innerText = dataRows.length;
+
+            // Total Quantity
+            cell = row.insertCell();
+            cell.innerText = dataRows.reduce((acc, dataRow) => acc + (dataRow.quantity || 0), 0);
+
+            // Total Revenue
+            cell = row.insertCell();
+            cell.innerText = dataRows.reduce((acc, dataRow) => acc + (dataRow.total_value || 0), 0);
+
+            // Average Quantity
+            cell = row.insertCell();
+            cell.innerText = (dataRows.reduce((acc, dataRow) => acc + (dataRow.quantity || 0), 0) / dataRows.length).toFixed(2);
+
+            // Average Unit Price
+            cell = row.insertCell();
+            cell.innerText = (dataRows.reduce((acc, dataRow) => acc + (dataRow.unit_price || 0), 0) / dataRows.length).toFixed(2);
+
+        }
+    }
+}
+
+new TableSummary(data);
