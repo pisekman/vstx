@@ -487,9 +487,8 @@ class Grid {
 new Grid(data, metadata);
 
 class TableSummary {
-    constructor(data, metadata) {
+    constructor(data) {
         this.data = data;
-        this.metadata = metadata;
         this.render();
     }
 
@@ -515,44 +514,29 @@ class TableSummary {
     }
 
     renderBody() {
-        const groupedData = this.data.reduce((acc, dataRow) => {
-            if (!acc[dataRow.author]) {
-                acc[dataRow.author] = [];
+        let groupedData = {};
+        for (const dataRow of this.data) {
+            if (!groupedData[dataRow.author]) {
+                groupedData[dataRow.author] = [];
             }
-            acc[dataRow.author].push(dataRow);
-            return acc;
-        }, {});
-
-        console.log(groupedData)
-        console.log(Object.entries(groupedData))
+            groupedData[dataRow.author].push(dataRow);
+        }
 
         for (const [author, dataRows] of Object.entries(groupedData)) {
             const row = this.body.insertRow();
 
-            // Author
-            let cell = row.insertCell();
-            cell.innerText = author;
+            const columns = [
+                {label: 'Author', value: author},
+                {label: 'Titles', value: dataRows.length},
+                {label: 'Total Quantity', value: dataRows.reduce((acc, dataRow) => acc + (dataRow.quantity || 0), 0)},
+                {label: 'Total Revenue', value: dataRows.reduce((acc, dataRow) => acc + (dataRow.total_value || 0), 0)},
+                {label: 'Average Quantity', value: (dataRows.reduce((acc, dataRow) => acc + (dataRow.quantity || 0), 0) / dataRows.length).toFixed(2)}, {label: 'Average Unit Price', value: (dataRows.reduce((acc, dataRow) => acc + (dataRow.unit_price || 0), 0) / dataRows.length).toFixed(2)}
+            ];
 
-            // Titles
-            cell = row.insertCell();
-            cell.innerText = dataRows.length;
-
-            // Total Quantity
-            cell = row.insertCell();
-            cell.innerText = dataRows.reduce((acc, dataRow) => acc + (dataRow.quantity || 0), 0);
-
-            // Total Revenue
-            cell = row.insertCell();
-            cell.innerText = dataRows.reduce((acc, dataRow) => acc + (dataRow.total_value || 0), 0);
-
-            // Average Quantity
-            cell = row.insertCell();
-            cell.innerText = (dataRows.reduce((acc, dataRow) => acc + (dataRow.quantity || 0), 0) / dataRows.length).toFixed(2);
-
-            // Average Unit Price
-            cell = row.insertCell();
-            cell.innerText = (dataRows.reduce((acc, dataRow) => acc + (dataRow.unit_price || 0), 0) / dataRows.length).toFixed(2);
-
+            for (const column of columns) {
+                const cell = row.insertCell();
+                cell.innerText = column.value;
+            }
         }
     }
 }
