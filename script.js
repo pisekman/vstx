@@ -209,6 +209,9 @@ class Grid {
         this.metadata = metadata;
         this.additionalDataFromBooksDB = additionalDataFromBooksDB;
         this.additionalMetadataFromBooksDB = additionalMetadataFromBooksDB;
+        this.mergedData = this.setMergeData();
+        this.mergedMetaData = this.setMergeMetaData();
+
 
         // HINT: below map can be useful for view operations ;))
         this.dataViewRef = new Map();
@@ -220,14 +223,27 @@ class Grid {
         this.live();
     }
 
-    getMergedData() {
-        return this.data.map(item => {
-            let additionalData = this.additionalDataFromBooksDB.find(additionalItem => additionalItem.title === item.title && additionalItem.author === item.author);
-            return {...item, ...additionalData};
-        });
-    }
+    setMergeData() {
+        const filteredData = this.data.map(item => item === null ? 0 : item);
 
-    getMergedMetadata() {
+        this.additionalDataFromBooksDB.forEach((item, index) => {
+            for (const key in item) {
+                if (item[key] === null) {
+                    item[key] = 0;
+                }
+            }
+            const filteredObj = filteredData[index];
+            Object.assign(item, filteredObj);
+        });
+
+        const totalData = [...this.data, ...this.additionalDataFromBooksDB];
+        const uniqueData = {};
+        for (const item of totalData) {
+            uniqueData[item.title] = item;
+        }
+        return Object.values(uniqueData);
+    }
+    setMergeMetaData() {
         const metadataIds = this.metadata.map(item => item.id);
         const filteredAdditionalMetadata = this.additionalMetadataFromBooksDB.filter(column => !metadataIds.includes(column.id));
         return [...this.metadata, ...filteredAdditionalMetadata];
@@ -246,26 +262,19 @@ class Grid {
     }
 
     renderHead() {
-        const mergedMetadata = this.getMergedMetadata()
-
         const row = this.head.insertRow();
 
-        for (const column of mergedMetadata) {
+        for (const column of this.mergedMetaData) {
             const cell = row.insertCell();
             cell.innerText = column.label;
         }
     }
 
     renderBody() {
-        const mergedMetadata = this.getMergedMetadata()
-        const mergedData = this.getMergedData()
-        // console.log(this.data, 'metdada')
-        // console.log(x, 'metdadax')
-
-        for (const dataRow of mergedData) {
+        for (const dataRow of this.mergedData) {
             const row = this.body.insertRow();
 
-            for (const column of mergedMetadata ) {
+            for (const column of this.mergedMetaData ) {
                 const cell = row.insertCell();
                 cell.classList.add(column.type);
                 cell.innerText = dataRow[column.id];
@@ -294,19 +303,14 @@ class Grid {
 
     onSearchGo(event) {
         console.error(`Searching...`);
-        const mergedData = this.getMergedData()
-        const mergedMetadata = this.getMergedMetadata()
 
         const searchQuery = searchInputElement.value;
 
-        for (const dataRow of mergedData) {
-            console.log(Object.entries(mergedData))
-            console.log(dataRow, 'dataRow')
+        for (const dataRow of this.mergedData) {
             const viewRow = this.dataViewRef.get(dataRow);
-            console.log(viewRow)
             let match = false;
 
-            for (const column of mergedMetadata) {
+            for (const column of this.mergedMetaData) {
                 if (dataRow[column.id] && dataRow[column.id].toString().includes(searchQuery)) {
                     match = true;
                     console.log('true')
@@ -315,6 +319,8 @@ class Grid {
             }
             if (!match) {
                 viewRow.classList.add('hidden');
+            } else {
+                viewRow.classList.remove('hidden');
             }
         }
 
@@ -322,6 +328,19 @@ class Grid {
 
     onSearchChange(event) {
         console.error(`Search btn pressed...`);
+        const searchQuery = searchInputElement.value.trim().toLowerCase();
+        for (const dataRow of this.mergedData) {
+            const viewRow = this.dataViewRef.get(dataRow);
+            const rowMatchesSearch = Object.values(dataRow).some(value =>
+                String(value).toLowerCase().includes(searchQuery)
+            );
+
+            if (rowMatchesSearch) {
+                viewRow.classList.remove('hidden');
+            } else {
+                viewRow.classList.add('hidden');
+            }
+        }
     }
 
     onSearchReset(event) {
@@ -329,6 +348,8 @@ class Grid {
         for (const row of this.body.rows) {
             row.classList.remove('hidden');
         }
+        searchInputElement.value = '';
+
     }
 
     onColumnHideClick(event) {
@@ -374,7 +395,7 @@ class Grid {
         for (const row of this.body.rows) {
             for (const cell of row.cells) {
                 if (cell.classList.contains('number') && cell.innerText === '') {
-                    cell.style.backgroundColor = 'yellow';
+                    cell.classList.add('bordered');
                 }
             }
         }
@@ -461,7 +482,7 @@ class Grid {
             for (const cell of row.cells) {
                 const headerCell = this.head.rows[0].cells[cell.cellIndex];
                 if (cell.classList.contains('number')) {
-                    cell.style.backgroundColor = '';
+                    cell.classList.remove('bordered')
                     switch (headerCell.innerText) {
                         case 'Total (Quantity * Unit price)':
                             if (rowData.total_value === null) {
