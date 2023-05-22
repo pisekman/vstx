@@ -228,9 +228,9 @@ class Grid {
     }
 
     getMergedMetadata() {
-        const metadataIds = this.metadata.map(column => column.id);
+        const metadataIds = this.metadata.map(item => item.id);
         const filteredAdditionalMetadata = this.additionalMetadataFromBooksDB.filter(column => !metadataIds.includes(column.id));
-        return [...this.metadata, ...filteredAdditionalMetadata]
+        return [...this.metadata, ...filteredAdditionalMetadata];
     }
 
     render() {
@@ -300,6 +300,7 @@ class Grid {
         const searchQuery = searchInputElement.value;
 
         for (const dataRow of mergedData) {
+            console.log(Object.entries(mergedData))
             console.log(dataRow, 'dataRow')
             const viewRow = this.dataViewRef.get(dataRow);
             console.log(viewRow)
