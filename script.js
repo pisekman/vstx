@@ -232,7 +232,7 @@ class Grid {
                 }
             }
             const filteredObj = filteredData[index];
-            Object.assign(item, filteredObj);
+            return Object.assign(item, filteredObj);
         });
 
         const totalData = [...this.data, ...this.additionalDataFromBooksDB];
@@ -303,6 +303,7 @@ class Grid {
     onSearchGo(event) {
         console.error(`Searching...`);
         /* Commented as there is no need to have both solutions live */
+
         // const searchQuery = searchInputElement.value
         //
         // for (const dataRow of this.mergedData) {
