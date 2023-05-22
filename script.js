@@ -212,7 +212,6 @@ class Grid {
         this.mergedData = this.setMergeData();
         this.mergedMetaData = this.setMergeMetaData();
 
-
         // HINT: below map can be useful for view operations ;))
         this.dataViewRef = new Map();
 
@@ -237,11 +236,11 @@ class Grid {
         });
 
         const totalData = [...this.data, ...this.additionalDataFromBooksDB];
-        const uniqueData = {};
+        let tempDataObj = {};
         for (const item of totalData) {
-            uniqueData[item.title] = item;
+            tempDataObj[item.title] = item;
         }
-        return Object.values(uniqueData);
+        return Object.values(tempDataObj);
     }
     setMergeMetaData() {
         const metadataIds = this.metadata.map(item => item.id);
@@ -303,42 +302,43 @@ class Grid {
 
     onSearchGo(event) {
         console.error(`Searching...`);
-
-        const searchQuery = searchInputElement.value;
-
-        for (const dataRow of this.mergedData) {
-            const viewRow = this.dataViewRef.get(dataRow);
-            let match = false;
-
-            for (const column of this.mergedMetaData) {
-                if (dataRow[column.id] && dataRow[column.id].toString().includes(searchQuery)) {
-                    match = true;
-                    console.log('true')
-                    break;
-                }
-            }
-            if (!match) {
-                viewRow.classList.add('hidden');
-            } else {
-                viewRow.classList.remove('hidden');
-            }
-        }
+        /* Commented as there is no need to have both solutions live */
+        // const searchQuery = searchInputElement.value
+        //
+        // for (const dataRow of this.mergedData) {
+        //     const viewRow = this.dataViewRef.get(dataRow);
+        //     let match = false;
+        //
+        //     for (const column of this.mergedMetaData) {
+        //         console.log(column,'column')
+        //         if (dataRow[column.id] && dataRow[column.id].toString().includes(searchQuery)) {
+        //             match = true;
+        //             break;
+        //         }
+        //     }
+        //     if (!match) {
+        //         viewRow.classList.add('hidden');
+        //     } else {
+        //         viewRow.classList.remove('hidden');
+        //     }
+        // }
 
     }
 
     onSearchChange(event) {
         console.error(`Search btn pressed...`);
         const searchQuery = searchInputElement.value.trim().toLowerCase();
+
         for (const dataRow of this.mergedData) {
             const viewRow = this.dataViewRef.get(dataRow);
-            const rowMatchesSearch = Object.values(dataRow).some(value =>
+            const matchSearchRow = Object.values(dataRow).some(value =>
                 String(value).toLowerCase().includes(searchQuery)
             );
 
-            if (rowMatchesSearch) {
-                viewRow.classList.remove('hidden');
-            } else {
+            if (!matchSearchRow) {
                 viewRow.classList.add('hidden');
+            } else {
+                viewRow.classList.remove('hidden');
             }
         }
     }
@@ -411,8 +411,9 @@ class Grid {
             let unitCell = null;
             let totalValue = 0;
             let totalCell = null;
+
             for (const cell of row.cells) {
-                const headerCell = this.head.rows[0].cells[cell.cellIndex]
+                const headerCell = this.head.rows[0].cells[cell.cellIndex];
                 if (cell.classList.contains('number')) {
                     switch (headerCell.innerText) {
                         case 'Total (Quantity * Unit price)':
@@ -430,15 +431,16 @@ class Grid {
                     }
                 }
             }
-            const isUnit = !isNaN(unitPrice) && unitPrice !== 0;
 
-            if (quantityCell && quantityValue === 0 && !isNaN(totalValue) && isUnit ){
+            const isUnitValid = !isNaN(unitPrice) && unitPrice !== 0;
+
+            if (quantityCell && quantityValue === 0 && !isNaN(totalValue) && isUnitValid) {
                 quantityCell.innerText = totalValue / unitPrice;
             }
-            if (totalCell && totalValue === 0  && !isNaN(quantityValue) && isUnit ){
-                totalCell.innerText = unitPrice * quantityValue
+            if (totalCell && totalValue === 0 && !isNaN(quantityValue) && isUnitValid) {
+                totalCell.innerText = unitPrice * quantityValue;
             }
-            if (unitCell && unitPrice === 0 ) {
+            if (unitCell && unitPrice === 0 && !isNaN(totalValue) && !isNaN(quantityValue)) {
                 unitCell.innerText = totalValue / quantityValue;
             }
         }
