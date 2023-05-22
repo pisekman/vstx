@@ -356,13 +356,13 @@ class Grid {
     onColumnHideClick(event) {
         console.error(`Hiding first visible column from the left...`);
 
-        for (const row of this.head.rows) {
-            const firstHeadCell = row.cells[0];
+        for (const rowHead of this.head.rows) {
+            const firstHeadCell = rowHead.cells[0];
             firstHeadCell.classList.toggle('hidden');
         }
 
-        for (const row of this.body.rows) {
-            const firstCell = row.cells[0];
+        for (const rowBody of this.body.rows) {
+            const firstCell = rowBody.cells[0];
             firstCell.classList.toggle('hidden');
         }
     }
